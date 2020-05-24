@@ -19,9 +19,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <unistd.h>
 #include <math.h>
-#include "ax25.h"
+
+#define M_PI 3.1415926
+
+#include <ax25/ax25.h>
+
 
 /* Default configuration */
 #define AX25_AFSK1200_SAMPLERATE     (48000)
@@ -127,7 +130,7 @@ static size_t _ax25_tx(ax25_t *ax25, int16_t *wav, uint8_t *frame, size_t length
 	for(i = 0; i < ax25->preamble; i++) len += _ax25_txbyte(ax25, &wav, 0x7E, 1);
 	for(i = 0; i < length; i++)         len += _ax25_txbyte(ax25, &wav, frame[i], 0);
 	for(i = 0; i < ax25->rest; i++)     len += _ax25_txbyte(ax25, &wav, 0x7E, 1);
-	
+
 	return(len);
 }
 
@@ -209,17 +212,17 @@ int ax25_frame(ax25_t *ax25, char *scallsign, char *dcallsign, char *path1, char
 	wav_len += wav_len / 5 + 1; /* Stuffing bits, worst case */
 	wav_len *= ax25->samplerate / ax25->bitrate; /* Samples per bit */
 	
-	wav = calloc(wav_len, sizeof(int16_t));
+	wav = AX25_MALLOC(wav_len * sizeof(int16_t));
 	if(!wav) return(AX25_OUT_OF_MEMORY);
+	memset(wav, 0, wav_len * sizeof(int16_t));
 	
 	/* Generate the tones */
 	wav_len = _ax25_tx(ax25, wav, frame, s - frame);
 	
 	/* Fire the callback to play/save the audio data */
-	if(ax25->audio_callback) (*ax25->audio_callback)(ax25->audio_callback_data, wav, wav_len);
+	(*ax25->audio_callback)(ax25->audio_callback_data, wav, wav_len);
 	
-	free(wav);
-	
+	AX25_FREE(wav);
 	return(AX25_OK);
 }
 

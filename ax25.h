@@ -14,6 +14,14 @@
 /* You should have received a copy of the GNU General Public License     */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <math.h>
+#include "FreeRTOS.h"
+
 #ifndef _AX25_H
 #define _AX25_H
 #ifdef __cplusplus
@@ -22,6 +30,9 @@ extern "C" {
 
 #define AX25_OK            (0)
 #define AX25_OUT_OF_MEMORY (1)
+
+#define AX25_MALLOC(x) pvPortMalloc(x)
+#define AX25_FREE(x) vPortFree(x)
 
 /* AX.25 does not define a maximum packet size */
 /* I set one here to keep things sensible */
